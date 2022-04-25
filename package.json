@@ -1,5 +1,5 @@
 {
-  "name": "webpack-panorama",
+  "name": "@unco/webpack-panorama",
   "version": "0.2.0",
   "description": "Utilities for using webpack with Valve's Panorama UI (for Dota 2 Custom Games).",
   "keywords": [
@@ -9,7 +9,7 @@
   ],
   "repository": "https://github.com/ark120202/webpack-panorama",
   "license": "MIT",
-  "author": "ark120202",
+  "author": "unco",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
