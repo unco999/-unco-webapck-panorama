@@ -1,13 +1,13 @@
 {
   "name": "@unco/webpack-panorama",
-  "version": "0.2.0",
+  "version": "0.0.0",
   "description": "Utilities for using webpack with Valve's Panorama UI (for Dota 2 Custom Games).",
   "keywords": [
     "dota",
     "panorama",
     "webpack"
   ],
-  "repository": "https://github.com/ark120202/webpack-panorama",
+  "repository": "https://github.com/unco999/-unco-webapck-panorama",
   "license": "MIT",
   "author": "unco",
   "main": "lib/index.js",
@@ -22,7 +22,7 @@
     "lint": "run-p lint:*",
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier --check .",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "npm run build"
   },
   "prettier": {
     "printWidth": 100,
