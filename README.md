@@ -4,6 +4,14 @@
 
 查看[本教程] ( https://moddota.com/panorama/webpack )以获取使用说明。  
 新添加了一个injectReactUmd这个选项会注入react与react-panorama进入  
+  
+webpack.config.js设置
+```javascript
+    output: {
+        path: path.resolve(__dirname, 'layout/custom_game/'),
+        publicPath: 'file://{resources}/layout/custom_game/',
+    },
+```
 gamui.CustomConfig的全局空间  
 ```javascript
           new PanoramaManifestPlugin({
