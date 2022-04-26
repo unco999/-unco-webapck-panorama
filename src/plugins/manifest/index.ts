@@ -51,7 +51,7 @@ export class PanoramaManifestPlugin {
   constructor({ entries, entryFilename,injectReactUmd,...options }: PanoramaManifestPluginOptions) {
     this.entries = entries;
     this.entryFilename = entryFilename ?? '[path][name].[ext]';
-    this.injectReactUmd = false
+    this.injectReactUmd = injectReactUmd
     this.htmlWebpackPlugin = new HtmlWebpackPlugin({
       filename: 'custom_ui_manifest.xml',
       inject: this.injectReactUmd,
