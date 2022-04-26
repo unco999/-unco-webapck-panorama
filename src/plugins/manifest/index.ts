@@ -2,8 +2,9 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import yaml from 'js-yaml';
 import { interpolateName } from 'loader-utils';
 import path from 'path';
+import fs from 'fs'
 import { promisify } from 'util';
-import webpack from 'webpack';
+import webpack, { WebpackError } from 'webpack';
 import ModuleDependency from 'webpack/lib/dependencies/ModuleDependency';
 import { makePathsRelative } from 'webpack/lib/util/identifier';
 import {
@@ -31,7 +32,7 @@ interface XmlAsset {
 
 export interface PanoramaManifestPluginOptions extends HtmlWebpackPlugin.Options {
   entries: string | ManifestEntry[];
-
+  injectReactUmd:boolean
   /**
    * @default '[path][name].[ext]'
    */
@@ -40,16 +41,20 @@ export interface PanoramaManifestPluginOptions extends HtmlWebpackPlugin.Options
 
 const addEntry = promisify(webpack.Compilation.prototype.addEntry);
 
+
 export class PanoramaManifestPlugin {
   private readonly entries: string | ManifestEntry[];
   private readonly entryFilename: string;
   private readonly htmlWebpackPlugin: HtmlWebpackPlugin;
-  constructor({ entries, entryFilename, ...options }: PanoramaManifestPluginOptions) {
+  private readonly injectReactUmd:boolean
+
+  constructor({ entries, entryFilename,injectReactUmd,...options }: PanoramaManifestPluginOptions) {
     this.entries = entries;
     this.entryFilename = entryFilename ?? '[path][name].[ext]';
+    this.injectReactUmd = false
     this.htmlWebpackPlugin = new HtmlWebpackPlugin({
       filename: 'custom_ui_manifest.xml',
-      inject: false,
+      inject: this.injectReactUmd,
       template: manifestTemplatePath,
       xhtml: true,
       ...options,
@@ -69,6 +74,11 @@ export class PanoramaManifestPlugin {
     );
 
     compiler.hooks.make.tapPromise(this.constructor.name, async (compilation) => {
+      this.injectReactUmd && (()=>{
+        const umd = fs.readFileSync(path.join(__filename,"../../../umd/react-umd/react-umd.js" ) )
+        fs.writeFile(compilation.options.output.path! + "/react-umd.js",umd,()=>{console.log("import ./react-umd/react-umd.js")})
+      })()
+      console.log('目标环境',compilation.options.context)
       let manifestName: string | undefined;
       let manifestContext: string;
       let entries: ManifestEntry[];
@@ -80,7 +90,7 @@ export class PanoramaManifestPlugin {
 
         const { inputFileSystem } = compiler;
         const readFile = promisify(inputFileSystem.readFile.bind(inputFileSystem));
-        const rawManifest = (await readFile(this.entries)).toString('utf8');
+        const rawManifest = (await readFile(this.entries))!.toString('utf8');
 
         try {
           if (/\.ya?ml$/.test(this.entries)) {
@@ -91,7 +101,7 @@ export class PanoramaManifestPlugin {
             throw new Error(`Unknown file extension '${path.extname(this.entries)}'`);
           }
         } catch (error) {
-          compilation.errors.push(new PanoramaManifestError(error.message, manifestName));
+          compilation.errors.push(new PanoramaManifestError((error as WebpackError).message, manifestName));
           return;
         }
       } else {
@@ -102,14 +112,17 @@ export class PanoramaManifestPlugin {
       try {
         validateManifest(entries, manifestName);
       } catch (error) {
-        compilation.errors.push(error);
+        compilation.errors.push((error as WebpackError));
         return;
       }
 
       const entryModuleTypes = new Map<webpack.Module, ManifestEntryType>();
-      await Promise.all(
-        entries.map(async (entry) => {
-          const name = entry.filename ?? entry.import;
+      for(const key in entries){
+         await AsynchronousSettingParameters.bind(this)(entries[key])
+      }
+
+      async function AsynchronousSettingParameters(this:PanoramaManifestPlugin,entry:any){
+        const name = entry.filename ?? entry.import;
           const filename =
             entry.filename ??
             (() => {
@@ -138,14 +151,20 @@ export class PanoramaManifestPlugin {
               );
             }
           }
-        }),
-      );
+      }
+
 
       const htmlHooks = HtmlWebpackPlugin.getHooks(compilation);
 
       htmlHooks.beforeAssetTagGeneration.tap(this.constructor.name, (args) => {
         const xmlAssets: XmlAsset[] = [];
-
+        if(!compilation.options.output.path){
+            console.log("请在webpack配置里写清楚output.path的地址...")
+            console.log("Please specify the address of output.path in the webpack configuration.")
+        }
+        if(compilation.options.output.path && this.injectReactUmd){
+            args.assets.js = [compilation.options.output.publicPath + '/react-umd.js']
+          }
         for (const [module, type] of entryModuleTypes) {
           for (const chunk of compilation.chunkGraph.getModuleChunksIterable(module)) {
             for (const file of chunk.files) {
@@ -155,7 +174,6 @@ export class PanoramaManifestPlugin {
             }
           }
         }
-
         (args.assets as any).xml = xmlAssets;
 
         return args;

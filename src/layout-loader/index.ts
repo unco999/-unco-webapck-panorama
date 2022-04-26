@@ -49,7 +49,7 @@ export default async function layoutLoader(
       () => {
         for (const chunk of this._compilation.chunkGraph.getModuleChunks(this._module)) {
           for (const file of chunk.files) {
-            // @ts-expect-error Expected 2 arguments, but got 1.
+            // // @ts-expect-error Expected 2 arguments, but got 1.
             this._compilation.updateAsset(file, new webpack.sources.RawSource(html));
           }
         }
@@ -58,6 +58,6 @@ export default async function layoutLoader(
 
     callback(null, '');
   } catch (error) {
-    callback(error);
+    callback((error as any));
   }
 }

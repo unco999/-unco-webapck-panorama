@@ -1,6 +1,6 @@
 {
-  "name": "webpack-panorama",
-  "version": "0.2.0",
+  "name": "unco-webpack-panorama",
+  "version": "0.0.6",
   "description": "Utilities for using webpack with Valve's Panorama UI (for Dota 2 Custom Games).",
   "keywords": [
     "dota",
@@ -22,7 +22,7 @@
     "lint": "run-p lint:*",
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier --check .",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "npm build"
   },
   "prettier": {
     "printWidth": 100,
