@@ -107,30 +107,39 @@ export class PanoramaManifestPlugin {
       }
 
       const entryModuleTypes = new Map<webpack.Module, ManifestEntryType>();
-     
-      for( const key in entries){
-        await asyncSetentry.bind(this)(entries[key])
-        async function asyncSetentry(entry){
-            var _a, _b;
-            const name = (_a = entry.filename) !== null && _a !== void 0 ? _a : entry.import;
-            const filename = (_b = entry.filename) !== null && _b !== void 0 ? _b : (() => {
-                const extension = module.userRequest.endsWith('.xml') ? 'xml' : 'js';
-                return loader_utils_1.interpolateName({ resourcePath: module.userRequest }, this.entryFilename.replace('[ext]', extension), { context: compiler.context });
+      await Promise.all(
+        entries.map(async (entry) => {
+          const name = entry.filename ?? entry.import;
+          const filename =
+            entry.filename ??
+            (() => {
+              const extension = module.userRequest.endsWith('.xml') ? 'xml' : 'js';
+              return interpolateName(
+                { resourcePath: module.userRequest },
+                this.entryFilename.replace('[ext]', extension),
+                { context: compiler.context },
+              );
             });
-            const dep = new PanoramaEntryDependency(entry.import);
-            dep.loc = { name };
-            await addEntry.call(compilation, manifestContext, dep, { name, filename });
-            const module = compilation.moduleGraph.getModule(dep);
-            if (entry.type != null) {
-                if (module.userRequest.endsWith('.xml')) {
-                    entryModuleTypes.set(module, entry.type);
-                }
-                else {
-                    compilation.errors.push(new manifest_1.PanoramaManifestError(`JavaScript '${entry.import}' entry point should not have 'type'.`, manifestName));
-                }
+
+          const dep = new PanoramaEntryDependency(entry.import);
+          dep.loc = { name };
+          await addEntry.call(compilation, manifestContext, dep, { name, filename });
+          const module = compilation.moduleGraph.getModule(dep) as webpack.NormalModule;
+
+          if (entry.type != null) {
+            if (module.userRequest.endsWith('.xml')) {
+              entryModuleTypes.set(module, entry.type);
+            } else {
+              compilation.errors.push(
+                new PanoramaManifestError(
+                  `JavaScript '${entry.import}' entry point should not have 'type'.`,
+                  manifestName,
+                ),
+              );
             }
-        }
-    }
+          }
+        }),
+      );
 
       const htmlHooks = HtmlWebpackPlugin.getHooks(compilation);
 
