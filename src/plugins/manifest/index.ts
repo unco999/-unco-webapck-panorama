@@ -3,7 +3,7 @@ import yaml from 'js-yaml';
 import { interpolateName } from 'loader-utils';
 import path from 'path';
 import { promisify } from 'util';
-import webpack, { WebpackError } from 'webpack';
+import webpack from 'webpack';
 import ModuleDependency from 'webpack/lib/dependencies/ModuleDependency';
 import { makePathsRelative } from 'webpack/lib/util/identifier';
 import {
@@ -80,7 +80,7 @@ export class PanoramaManifestPlugin {
 
         const { inputFileSystem } = compiler;
         const readFile = promisify(inputFileSystem.readFile.bind(inputFileSystem));
-        const rawManifest = (await readFile(this.entries))!.toString('utf8');
+        const rawManifest = (await readFile(this.entries)).toString('utf8');
 
         try {
           if (/\.ya?ml$/.test(this.entries)) {
@@ -91,7 +91,7 @@ export class PanoramaManifestPlugin {
             throw new Error(`Unknown file extension '${path.extname(this.entries)}'`);
           }
         } catch (error) {
-          compilation.errors.push(new PanoramaManifestError((error as WebpackError).message, manifestName));
+          compilation.errors.push(new PanoramaManifestError(error.message, manifestName));
           return;
         }
       } else {
@@ -102,47 +102,35 @@ export class PanoramaManifestPlugin {
       try {
         validateManifest(entries, manifestName);
       } catch (error) {
-        compilation.errors.push((error as WebpackError));
+        compilation.errors.push(error);
         return;
       }
 
       const entryModuleTypes = new Map<webpack.Module, ManifestEntryType>();
-      for(const key in entries){
-         await AsynchronousSettingParameters.bind(this)(entries[key])
-      }
-
-      async function AsynchronousSettingParameters(this:PanoramaManifestPlugin,entry:any){
-        const name = entry.filename ?? entry.import;
-          const filename =
-            entry.filename ??
-            (() => {
-              const extension = module.userRequest.endsWith('.xml') ? 'xml' : 'js';
-              return interpolateName(
-                { resourcePath: module.userRequest },
-                this.entryFilename.replace('[ext]', extension),
-                { context: compiler.context },
-              );
+     
+      for( const key in entries){
+        await asyncSetentry.bind(this)(entries[key])
+        async function asyncSetentry(entry){
+            var _a, _b;
+            const name = (_a = entry.filename) !== null && _a !== void 0 ? _a : entry.import;
+            const filename = (_b = entry.filename) !== null && _b !== void 0 ? _b : (() => {
+                const extension = module.userRequest.endsWith('.xml') ? 'xml' : 'js';
+                return loader_utils_1.interpolateName({ resourcePath: module.userRequest }, this.entryFilename.replace('[ext]', extension), { context: compiler.context });
             });
-
-          const dep = new PanoramaEntryDependency(entry.import);
-          dep.loc = { name };
-          await addEntry.call(compilation, manifestContext, dep, { name, filename });
-          const module = compilation.moduleGraph.getModule(dep) as webpack.NormalModule;
-
-          if (entry.type != null) {
-            if (module.userRequest.endsWith('.xml')) {
-              entryModuleTypes.set(module, entry.type);
-            } else {
-              compilation.errors.push(
-                new PanoramaManifestError(
-                  `JavaScript '${entry.import}' entry point should not have 'type'.`,
-                  manifestName,
-                ),
-              );
+            const dep = new PanoramaEntryDependency(entry.import);
+            dep.loc = { name };
+            await addEntry.call(compilation, manifestContext, dep, { name, filename });
+            const module = compilation.moduleGraph.getModule(dep);
+            if (entry.type != null) {
+                if (module.userRequest.endsWith('.xml')) {
+                    entryModuleTypes.set(module, entry.type);
+                }
+                else {
+                    compilation.errors.push(new manifest_1.PanoramaManifestError(`JavaScript '${entry.import}' entry point should not have 'type'.`, manifestName));
+                }
             }
-          }
-      }
-
+        }
+    }
 
       const htmlHooks = HtmlWebpackPlugin.getHooks(compilation);
 

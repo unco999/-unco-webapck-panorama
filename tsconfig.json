@@ -1,7 +1,6 @@
 {
   "extends": "@ark120202/typescript-config/node/14.json",
   "compilerOptions": {
-    "lib": ["ES2020"],
     "rootDir": "src",
     "outDir": "lib",
 
