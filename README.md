@@ -43,5 +43,42 @@ declare global{
       const useState:typeof React.useState
   }
 ```
+webpack.config.js
+```javascript
+   module: {
+        rules: [
+            {
+                test: /\.xml$/,
+                loader: 'unco-webpack-panorama/lib/layout-loader',
+            },
+            {
+                test: /\.[jt]sx?$/,
+                issuer: /\.xml$/,
+                loader: 'unco-webpack-panorama/lib/entry-loader',
+            },
+            {
+                test: /\.tsx?$/,
+                loader: 'ts-loader',
+                options: { transpileOnly: true },
+            },
+            {
+                test: /\.(css|s[ac]ss)$/,
+                issuer: /\.xml$/,
+                loader: 'file-loader',
+                options: { name: '[path][name].css', esModule: false },
+            },
+            {
+                test: /\.s[ac]ss$/,
+                loader: 'sass-loader',
+                options: {
+                    implementation: require('node-sass'),
+                    sassOptions: {
+                        outputStyle: 'expanded',
+                    },
+                },
+            },
+        ],
+    },
+```
 
 
