@@ -7,7 +7,7 @@
     "panorama",
     "webpack"
   ],
-  "repository": "https://github.com/ark120202/webpack-panorama",
+  "repository": "https://github.com/unco999/-unco-webapck-panorama",
   "license": "MIT",
   "author": "ark120202",
   "main": "lib/index.js",
