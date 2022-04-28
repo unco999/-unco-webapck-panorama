@@ -47,6 +47,7 @@ export class PanoramaManifestPlugin {
   private readonly entryFilename: string;
   private readonly htmlWebpackPlugin: HtmlWebpackPlugin;
   private readonly injectReactUmd:boolean
+  private Init:boolean = false
 
   constructor({ entries, entryFilename,injectReactUmd,...options }: PanoramaManifestPluginOptions) {
     this.entries = entries;
@@ -74,9 +75,11 @@ export class PanoramaManifestPlugin {
     );
 
     compiler.hooks.make.tapPromise(this.constructor.name, async (compilation) => {
-      this.injectReactUmd && (()=>{
+      !this.Init && this.injectReactUmd && (()=>{
         const umd = fs.readFileSync(path.join(__filename,"../../../umd/react-umd/react-umd.js" ) )
         fs.writeFile(compilation.options.output.path! + "/react-umd.js",umd,()=>{console.log("import ./react-umd/react-umd.js")})
+        fs.writeFile(compilation.options.context! + "/unco_global.d.ts",Global(),()=>{console.log("import ./react-umd/global.d.ts.js")})
+        this.Init = true
       })()
       console.log('目标环境',compilation.options.context)
       let manifestName: string | undefined;
@@ -162,14 +165,16 @@ export class PanoramaManifestPlugin {
             console.log("请在webpack配置里写清楚output.path的地址...")
             console.log("Please specify the address of output.path in the webpack configuration.")
         }
-        if(compilation.options.output.path && this.injectReactUmd){
+        if(!this.Init && compilation.options.output.path && this.injectReactUmd){
             args.assets.js = [compilation.options.output.publicPath + '/react-umd.js']
-          }
+            
+            this.Init = true
+        }
         for (const [module, type] of entryModuleTypes) {
           for (const chunk of compilation.chunkGraph.getModuleChunksIterable(module)) {
             for (const file of chunk.files) {
               if (file.endsWith('.xml')) {
-                xmlAssets.push({ file: args.assets.publicPath + file, type });
+                xmlAssets.push({ file: args.assets.publicPath + file, type  });
               }
             }
           }
@@ -180,4 +185,29 @@ export class PanoramaManifestPlugin {
       });
     });
   }
+}
+
+function Global() {
+  return (
+  `import React from 'react'
+  import ReactPanorama from "@demon673/react-panorama"
+  
+  declare global{
+      const React:typeof React
+      const ReactPanorama:typeof ReactPanorama
+      const useNetTableKey:typeof ReactPanorama.useNetTableKey
+      const render:typeof ReactPanorama.render
+      const useGameEvent:typeof ReactPanorama.useGameEvent
+      const useNetTableValues:typeof ReactPanorama.useNetTableValues
+      const useRegisterForUnhandledEvent:typeof ReactPanorama.useRegisterForUnhandledEvent
+      const memo:typeof React.memo
+      const useCallback:typeof React.useCallback
+      const useContext:typeof React.useContext
+      const useDebugValue:typeof React.useDebugValue
+      const useEffect:typeof React.useEffect
+      const useLayoutEffect:typeof React.useLayoutEffect
+      const useReducer:typeof React.useReducer
+      const useRef:typeof React.useRef
+      const useState:typeof React.useState
+  }`)
 }

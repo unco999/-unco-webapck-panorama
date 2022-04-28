@@ -39,11 +39,32 @@ export default async function layoutLoader(
 
   try {
     const input = meta?.ast?.type === 'posthtml' ? meta.ast.root : source;
-    const { html } = await posthtml(plugins).process(input, {
+    let { html } = await posthtml(plugins).process(input, {
       closingSingleTag: 'slash',
       xmlMode: true,
     });
-
+    const table = html.split("\n")
+    table.splice(1,0,"<script>\n")
+    table.splice(2,0,`      
+    const React = GameUI.CustomUIConfig().React
+    const ReactPanorama = GameUI.CustomUIConfig().ReactPanorama
+    const PanelContainer = GameUI.CustomUIConfig().PanelContainer;
+    if(!this['React']){
+    this.React = React
+    for(const key in PanelContainer){
+        //@ts-ignore
+        this[key] = PanelContainer[key]
+    }
+    for(const key in ReactPanorama){
+        this[key] = ReactPanorama[key]
+    }
+    for(const key in React){
+        this[key] = React[key]
+    }
+    }
+    \n`)
+    table.splice(3,0,"</script>\n")
+    html = table.join("\n")
     this._compilation.hooks.processAssets.tap(
       { name: 'layout-loader', stage: webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE },
       () => {

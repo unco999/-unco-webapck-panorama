@@ -22,4 +22,4 @@ export const banTextNodes = (context: LoaderContext): posthtml.Plugin => (tree) 
   });
 
   return tree;
-};
+}
