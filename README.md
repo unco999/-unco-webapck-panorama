@@ -1,7 +1,7 @@
 # `webpack-panorama`
 
 > Utilities for using webpack with Valve's Panorama UI (for Dota 2 Custom Games).
-
+十分抱歉 几次没编译就上传了 现在确定0.1.4可以使用
 查看[本教程] ( https://moddota.com/panorama/webpack )以获取使用说明。  
 新添加了一个injectReactUmd这个选项会注入react与react-panorama进入  
 注意=>现在gameui.config的全局会自动注入每个xml的假全局变量

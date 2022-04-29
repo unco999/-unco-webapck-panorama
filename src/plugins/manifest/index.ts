@@ -33,6 +33,7 @@ interface XmlAsset {
 export interface PanoramaManifestPluginOptions extends HtmlWebpackPlugin.Options {
   entries: string | ManifestEntry[];
   injectReactUmd:boolean
+  css:string[]
   /**
    * @default '[path][name].[ext]'
    */
@@ -47,15 +48,17 @@ export class PanoramaManifestPlugin {
   private readonly entryFilename: string;
   private readonly htmlWebpackPlugin: HtmlWebpackPlugin;
   private readonly injectReactUmd:boolean
+  private readonly css:string[] 
   private Init:boolean = false
 
-  constructor({ entries, entryFilename,injectReactUmd,...options }: PanoramaManifestPluginOptions) {
+  constructor({ entries, entryFilename,injectReactUmd,css,...options }: PanoramaManifestPluginOptions) {
     this.entries = entries;
     this.entryFilename = entryFilename ?? '[path][name].[ext]';
     this.injectReactUmd = injectReactUmd
+    this.css = css
     this.htmlWebpackPlugin = new HtmlWebpackPlugin({
       filename: 'custom_ui_manifest.xml',
-      inject: this.injectReactUmd,
+      inject: false,
       template: manifestTemplatePath,
       xhtml: true,
       ...options,
@@ -79,9 +82,7 @@ export class PanoramaManifestPlugin {
         const umd = fs.readFileSync(path.join(__filename,"../../../umd/react-umd/react-umd.js" ) )
         fs.writeFile(compilation.options.output.path! + "/react-umd.js",umd,()=>{console.log("import ./react-umd/react-umd.js")})
         fs.writeFile(compilation.options.context! + "/unco_global.d.ts",Global(),()=>{console.log("import ./react-umd/global.d.ts.js")})
-        this.Init = true
       })()
-      console.log('目标环境',compilation.options.context)
       let manifestName: string | undefined;
       let manifestContext: string;
       let entries: ManifestEntry[];
@@ -94,7 +95,7 @@ export class PanoramaManifestPlugin {
         const { inputFileSystem } = compiler;
         const readFile = promisify(inputFileSystem.readFile.bind(inputFileSystem));
         const rawManifest = (await readFile(this.entries))!.toString('utf8');
-
+        
         try {
           if (/\.ya?ml$/.test(this.entries)) {
             entries = (yaml.safeLoad(rawManifest) as any) ?? [];
@@ -141,7 +142,6 @@ export class PanoramaManifestPlugin {
           dep.loc = { name };
           await addEntry.call(compilation, manifestContext, dep, { name, filename });
           const module = compilation.moduleGraph.getModule(dep) as webpack.NormalModule;
-
           if (entry.type != null) {
             if (module.userRequest.endsWith('.xml')) {
               entryModuleTypes.set(module, entry.type);
@@ -159,16 +159,31 @@ export class PanoramaManifestPlugin {
 
       const htmlHooks = HtmlWebpackPlugin.getHooks(compilation);
 
+      htmlHooks.afterTemplateExecution.tap(this.constructor.name,(args)=>{
+        const table = args.html.split("\n")
+        table.splice(1,0,"<styles>\n")
+        table.splice(2,0,`      
+            <include src="s2r://panorama/styles/dotastyles.vcss_c"/>
+        \n`)
+        table.splice(3,0,"</styles>\n")
+        if(compilation.options.output.path && this.injectReactUmd){
+          const index = table.findIndex((value,index)=>{
+              if(value.search(/<scripts>/g) > -1){
+                  return index
+              }
+          })
+          table.splice(index + 1,0,`<include src="file://{resources}/layout/custom_game/react-umd.js" />\n`)
+        }
+        args.html = table.join("\n")
+        this.Init = true
+        return args
+      })
+
       htmlHooks.beforeAssetTagGeneration.tap(this.constructor.name, (args) => {
         const xmlAssets: XmlAsset[] = [];
         if(!compilation.options.output.path){
             console.log("请在webpack配置里写清楚output.path的地址...")
             console.log("Please specify the address of output.path in the webpack configuration.")
-        }
-        if(!this.Init && compilation.options.output.path && this.injectReactUmd){
-            args.assets.js = [compilation.options.output.publicPath + '/react-umd.js']
-            
-            this.Init = true
         }
         for (const [module, type] of entryModuleTypes) {
           for (const chunk of compilation.chunkGraph.getModuleChunksIterable(module)) {
@@ -209,5 +224,6 @@ function Global() {
       const useReducer:typeof React.useReducer
       const useRef:typeof React.useRef
       const useState:typeof React.useState
+      const useMemo:typeof React.useMemo
   }`)
 }
