@@ -66,6 +66,7 @@ export class PanoramaManifestPlugin {
   }
 
   public apply(compiler: webpack.Compiler) {
+    console.log("开始")
     compiler.options.entry = {};
 
     this.htmlWebpackPlugin.apply(compiler);
@@ -81,7 +82,7 @@ export class PanoramaManifestPlugin {
       !this.Init && this.injectReactUmd && (()=>{
         const umd = fs.readFileSync(path.join(__filename,"../../../umd/react-umd/react-umd.js" ) )
         fs.writeFile(compilation.options.output.path! + "/react-umd.js",umd,()=>{console.log("import ./react-umd/react-umd.js")})
-        fs.writeFile(compilation.options.context! + "/unco_global.d.ts",Global(),()=>{console.log("import ./react-umd/global.d.ts.js")})
+        fs.writeFile(compilation.options.context! + "/unco_global.d.ts",fs.readFileSync(path.join(__filename,"../../../umd/react-umd/global.d.ts" )),()=>{console.log("import ./react-umd/global.d.ts.js")})
       })()
       let manifestName: string | undefined;
       let manifestContext: string;
@@ -159,6 +160,7 @@ export class PanoramaManifestPlugin {
 
       const htmlHooks = HtmlWebpackPlugin.getHooks(compilation);
 
+
       htmlHooks.afterTemplateExecution.tap(this.constructor.name,(args)=>{
         const table = args.html.split("\n")
         table.splice(1,0,"<styles>\n")
@@ -202,28 +204,3 @@ export class PanoramaManifestPlugin {
   }
 }
 
-function Global() {
-  return (
-  `import React from 'react'
-  import ReactPanorama from "@demon673/react-panorama"
-  
-  declare global{
-      const React:typeof React
-      const ReactPanorama:typeof ReactPanorama
-      const useNetTableKey:typeof ReactPanorama.useNetTableKey
-      const render:typeof ReactPanorama.render
-      const useGameEvent:typeof ReactPanorama.useGameEvent
-      const useNetTableValues:typeof ReactPanorama.useNetTableValues
-      const useRegisterForUnhandledEvent:typeof ReactPanorama.useRegisterForUnhandledEvent
-      const memo:typeof React.memo
-      const useCallback:typeof React.useCallback
-      const useContext:typeof React.useContext
-      const useDebugValue:typeof React.useDebugValue
-      const useEffect:typeof React.useEffect
-      const useLayoutEffect:typeof React.useLayoutEffect
-      const useReducer:typeof React.useReducer
-      const useRef:typeof React.useRef
-      const useState:typeof React.useState
-      const useMemo:typeof React.useMemo
-  }`)
-}

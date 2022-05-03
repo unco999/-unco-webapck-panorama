@@ -46,9 +46,11 @@ export default async function layoutLoader(
     const table = html.split("\n")
     table.splice(1,0,"<script>\n")
     table.splice(2,0,`      
+    GameUI.CustomUIConfig().uid = GameUI.CustomUIConfig().overload()
     const React = GameUI.CustomUIConfig().React
     const ReactPanorama = GameUI.CustomUIConfig().ReactPanorama
-    const PanelContainer = GameUI.CustomUIConfig().PanelContainer;
+    const bundle = GameUI.CustomUIConfig().bundle
+    const PanelContainer = GameUI.CustomUIConfig().PanelContainer
     if(!this['React']){
     this.React = React
     for(const key in PanelContainer){
@@ -61,7 +63,10 @@ export default async function layoutLoader(
     for(const key in React){
         this[key] = React[key]
     }
-    }
+  }
+  for(const key in bundle){
+    this[key] = bundle[key]
+  }
     \n`)
     table.splice(3,0,"</script>\n")
     html = table.join("\n")
