@@ -72,6 +72,36 @@ shortid.generate():string  返回一个UUID
 
 
 ```
+
+
+有必要的全局申明
+
+```javascript 
+interface StoreContextDeclarations{
+    weapon:{
+        name:string
+        attack:number
+    }
+    ability:{
+        name:string
+    }
+    Test1:string,
+    Test2:string,
+}
+
+interface uncoFlags{
+    unco:any
+}
+
+interface NodeName{
+    test1:string
+    test2:string
+}
+
+}
+
+
+```
   
 webpack.config.js设置
 ```javascript
