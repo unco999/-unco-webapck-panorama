@@ -8,6 +8,70 @@
 注意=>现在gameui.config的全局会自动注入每个xml的假全局变量
 也就是说  usestate useeffect等函数直接调用就行  不用引入任何申明
 直接使用就可以了
+
+增加了新的全局UMD捆绑
+shortid.generate():string  返回一个UUID
+增加了usetore 全局状态管理hook
+
+
+这是test2组件
+```javascript 
+    export const Test2 = () =>{
+    /**
+     * Node 节点    anineshake 防抖函数    send 节点间通信  serve 总中心
+     * windowsR 全局窗口注册坐标     trigger 收到信息时 该值会变换一次 就是一个触发器
+     */
+    const {Node,aineshake,send,serve,windowsR,trigger}  =  useStore({name:"test1",context:"weapon",flags:["unco"]})
+    const [state,setstate] = useState(0)
+
+    useEffect(()=>{
+        //还没创建出来就不做初始化
+        if(!Node) return
+        //初始化容器 设置整个表
+        Node.SetContainer({name:"AXE","attack":100})
+        //设置单个值
+        Node.SetValue("attack",123)
+        //只对表中的number做add操作 可以为负数 若值不在就创造新值
+        Node.inc({"attack":1})
+        //在该节点上注册open事件触发器
+        Node.FuncR("open",()=>{
+            setstate(value=>value+1)
+        })
+    },[Node]) //检测Node是否创建成功
+
+
+    const click = () =>{
+        $.Msg("判断防抖函数是否到期")
+        if(!aineshake()) return
+    }
+    
+    return <Panel {...windowsR} onactivate={click}></Panel>
+
+}
+
+```
+
+这是test1组件
+```javascript 
+   export const Test1 = () =>{
+    //和test1一样  这个context都是处于weapon  trigger是个触发器  当节点被update就会被触发
+    const {Node,trigger,send} = useStore({name:'test2',context:"weapon"})
+
+    useEffect(()=>{
+        // 当节点改变 我们打印getcontainer
+        $.Msg(Node?.GetContainer())
+
+
+        send("test1","open") //我们可以往test1发送信号
+    },[trigger])
+
+    //当trigger被触发  这里的值也会被刷新  
+    return <Label text={Node?.GetContainer()?.name}></Label>
+
+}
+
+
+```
   
 webpack.config.js设置
 ```javascript
