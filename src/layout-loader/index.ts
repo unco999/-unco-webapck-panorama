@@ -51,6 +51,7 @@ export default async function layoutLoader(
     const ReactPanorama = GameUI.CustomUIConfig().ReactPanorama
     const bundle = GameUI.CustomUIConfig().bundle
     const PanelContainer = GameUI.CustomUIConfig().PanelContainer
+    this['shortid'] = GameUI.CustomUIConfig().bundle.uncoshorid
     if(!this['React']){
     this.React = React
     for(const key in PanelContainer){
