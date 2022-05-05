@@ -15,6 +15,10 @@
 增加了新的全局UMD捆绑
 shortid.generate():string  返回一个UUID
 
+为了等待中心store初始化完毕
+建议异步渲染
+$.Schedule(0,()=>render(any,$.GetContextPanel())
+
 
 这是test2组件
 ```javascript 
