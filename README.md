@@ -2,6 +2,9 @@
 
 > Utilities for using webpack with Valve's Panorama UI (for Dota 2 Custom Games).
 > 2022/4/30 更新 => 增加useMemo的申明 解决了特殊组件渲染问题 
+> 增加了usetore 全局状态管理hook
+> 增加了send方法传入参数  send(key,value,update)
+> 修复serve.GetNodeByFlag
 
 查看[本教程] ( https://moddota.com/panorama/webpack )以获取使用说明。  
 新添加了一个injectReactUmd这个选项会注入react与react-panorama进入  
@@ -11,7 +14,6 @@
 
 增加了新的全局UMD捆绑
 shortid.generate():string  返回一个UUID
-增加了usetore 全局状态管理hook
 
 
 这是test2组件
