@@ -5,6 +5,7 @@
 > 增加了usetore 全局状态管理hook
 > 增加了send方法传入参数  send(key,value,update)
 > 修复serve.GetNodeByFlag
+> 增加FuncR interface
 
 查看[本教程] ( https://moddota.com/panorama/webpack )以获取使用说明。  
 新添加了一个injectReactUmd这个选项会注入react与react-panorama进入  

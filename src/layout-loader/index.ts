@@ -43,34 +43,37 @@ export default async function layoutLoader(
       closingSingleTag: 'slash',
       xmlMode: true,
     });
-    const table = html.split("\n")
-    table.splice(1,0,"<script>\n")
-    table.splice(2,0,`      
-    GameUI.CustomUIConfig().uid = GameUI.CustomUIConfig().overload()
-    const React = GameUI.CustomUIConfig().React
-    const ReactPanorama = GameUI.CustomUIConfig().ReactPanorama
-    const bundle = GameUI.CustomUIConfig().bundle
-    const PanelContainer = GameUI.CustomUIConfig().PanelContainer
-    this['shortid'] = GameUI.CustomUIConfig().bundle.uncoshorid
-    if(!this['React']){
-    this.React = React
-    for(const key in PanelContainer){
-        //@ts-ignore
-        this[key] = PanelContainer[key]
+    if(!this.resourcePath.includes('loading-screen')){
+      const table = html.split("\n")
+      table.splice(1,0,"<script>\n")
+      table.splice(2,0,`      
+      GameUI.CustomUIConfig().uid = GameUI.CustomUIConfig().overload()
+      const React = GameUI.CustomUIConfig().React
+      const ReactPanorama = GameUI.CustomUIConfig().ReactPanorama
+      const bundle = GameUI.CustomUIConfig().bundle
+      const PanelContainer = GameUI.CustomUIConfig().PanelContainer
+      this['shortid'] = GameUI.CustomUIConfig().bundle.uncoshorid
+      if(!this['React']){
+      this.React = React
+      for(const key in PanelContainer){
+          //@ts-ignore
+          this[key] = PanelContainer[key]
+      }
+      for(const key in ReactPanorama){
+          this[key] = ReactPanorama[key]
+      }
+      for(const key in React){
+          this[key] = React[key]
+      }
     }
-    for(const key in ReactPanorama){
-        this[key] = ReactPanorama[key]
+    for(const key in bundle){
+      this[key] = bundle[key]
     }
-    for(const key in React){
-        this[key] = React[key]
+      \n`)
+      table.splice(3,0,"</script>\n")
+      html = table.join("\n")
     }
-  }
-  for(const key in bundle){
-    this[key] = bundle[key]
-  }
-    \n`)
-    table.splice(3,0,"</script>\n")
-    html = table.join("\n")
+
     this._compilation.hooks.processAssets.tap(
       { name: 'layout-loader', stage: webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE },
       () => {

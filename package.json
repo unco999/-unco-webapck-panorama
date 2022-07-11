@@ -1,6 +1,6 @@
 {
   "name": "unco-webpack-panorama",
-  "version": "0.1.9",
+  "version": "0.2.5",
   "description": "Utilities for using webpack with Valve's Panorama UI (for Dota 2 Custom Games).",
   "keywords": [
     "dota",
