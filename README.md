@@ -7,6 +7,11 @@
 > 修复serve.GetNodeByFlag
 > 增加FuncR interface
 
+新增加一个error hook  在这里可以自定义报错回调
+GameUI.CustomUIConfig().error = (error:any) =>{
+    $.Msg(error)
+}
+
 查看[本教程] ( https://moddota.com/panorama/webpack )以获取使用说明。  
 新添加了一个injectReactUmd这个选项会注入react与react-panorama进入  
 注意=>现在gameui.config的全局会自动注入每个xml的假全局变量
